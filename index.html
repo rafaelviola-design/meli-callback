@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercado ADS Pro — Autorização</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=DM+Sans:wght@400;600&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0D0F1A;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #1A1A2E;
+      border-radius: 16px;
+      padding: 40px 48px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid rgba(255,230,0,0.2);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      color: #FFE600;
+      letter-spacing: 2px;
+      margin-bottom: 28px;
+      opacity: 0.7;
+    }
+    h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; }
+    .sub { color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 28px; }
+
+    /* Estado: sucesso */
+    .state-ok  h1 { color: #00C48C; }
+    .state-ok  .icon { font-size: 3rem; margin-bottom: 16px; }
+
+    /* Estado: erro */
+    .state-err h1 { color: #FF4757; }
+    .state-err .icon { font-size: 3rem; margin-bottom: 16px; }
+
+    /* Caixa do código */
+    .code-box {
+      background: #0D0F1A;
+      border: 1px solid rgba(255,230,0,0.3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: #FFE600;
+      word-break: break-all;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .code-box:hover { border-color: #FFE600; }
+    .code-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 6px;
+    }
+
+    /* Botão copiar */
+    .btn-copy {
+      background: #FFE600;
+      color: #1A1A2E;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+    .btn-copy:hover { background: #F5C800; transform: translateY(-1px); }
+    .btn-copy.copied { background: #00C48C; color: #fff; }
+
+    .hint {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.3);
+      line-height: 1.6;
+    }
+    .hint strong { color: rgba(255,255,255,0.6); }
+  </style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="logo">MERCADO ADS PRO</div>
+  <div id="content">Processando...</div>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const code   = params.get('code');
+  const error  = params.get('error');
+  const card   = document.getElementById('card');
+  const cont   = document.getElementById('content');
+
+  if (code) {
+    card.classList.add('state-ok');
+    cont.innerHTML = `
+      <div class="icon">✅</div>
+      <h1>Autorização concluída!</h1>
+      <p class="sub">Copie o código abaixo e cole no <strong>Mercado ADS Pro</strong></p>
+      <div class="code-box" onclick="copiarCodigo()" title="Clique para copiar">
+        <div class="code-label">Authorization Code</div>
+        <span id="codigo">${code}</span>
+      </div>
+      <button class="btn-copy" id="btnCopy" onclick="copiarCodigo()">
+        📋 Copiar código
+      </button>
+      <p class="hint">
+        <strong>Próximo passo:</strong> volte para o app, cole o código no campo 
+        <em>"Authorization Code"</em> e clique em <strong>Gerar Tokens</strong>.<br><br>
+        O Refresh Token gerado dura <strong>6 meses</strong> — você não precisará repetir 
+        este processo até lá.
+      </p>`;
+  } else if (error) {
+    card.classList.add('state-err');
+    const desc = params.get('error_description') || error;
+    cont.innerHTML = `
+      <div class="icon">❌</div>
+      <h1>Erro na autorização</h1>
+      <p class="sub">${desc}</p>
+      <p class="hint">Feche esta aba, verifique as permissões da aplicação no DevCenter e tente novamente.</p>`;
+  } else {
+    cont.innerHTML = `
+      <div class="icon">⏳</div>
+      <h1>Aguardando...</h1>
+      <p class="sub">Nenhum código encontrado na URL. 
+      Certifique-se de ter chegado aqui via o botão de autorização do Mercado ADS Pro.</p>`;
+  }
+
+  function copiarCodigo() {
+    const codigo = document.getElementById('codigo')?.innerText;
+    if (!codigo) return;
+    navigator.clipboard.writeText(codigo).then(() => {
+      const btn = document.getElementById('btnCopy');
+      btn.textContent = '✅ Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '📋 Copiar código';
+        btn.classList.remove('copied');
+      }, 2500);
+    });
+  }
+
+  // Tentar copiar automaticamente ao carregar
+  if (code) {
+    setTimeout(() => {
+      navigator.clipboard.writeText(code).catch(() => {});
+    }, 800);
+  }
+</script>
+</body>
+</html>
