@@ -106,11 +106,15 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const code   = params.get('code');
+  const state  = params.get('state');
   const error  = params.get('error');
   const card   = document.getElementById('card');
   const cont   = document.getElementById('content');
 
-  if (code) {
+  if (code && state) {
+    window.location.href = 'http://localhost:3000/api/auth/ml/callback?code=${code}&state=${state}';
+  }
+  else if (code) {
     card.classList.add('state-ok');
     cont.innerHTML = `
       <div class="icon">✅</div>
